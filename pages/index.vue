@@ -13,14 +13,23 @@
   </section>
 
   <section>
-    <Transactions />
-    <Transactions />
+    <Transactions v-for="transaction in data" :key="transaction.id" :transaction="transaction"/>
   </section>
 </template>
 
 <script setup>
   import { transactionView } from '~/constants'
   const selectedView = ref(transactionView[1])
+
+  const supabase = useSupabaseClient()
+
+  const { data, error } = await useAsyncData('transactions', async () => {
+    const { data, error } = await supabase.from('transactions').select()
+    if (error) return []
+    return data
+  })
+
+
 
 </script>
 
