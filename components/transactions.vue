@@ -26,6 +26,8 @@
   const props = defineProps({
       transaction: Object
   })
+  const emit = defineEmits(['deleted'])
+
   const supabase = useSupabaseClient()
   const toast = useToast()
 
@@ -40,16 +42,15 @@
         .eq('id', props.transaction.id)
 
         toast.add({
-          id: 'update_downloaded',
           title: 'Transaction deleted.',
-          description: 'Data will be loaded in a second?',
+          description: 'Data will be loaded in a few seconds',
           icon: 'i-heroicons-check-circle',
           color: 'green'
         })
+        emit('deleted', props.transaction.id)
     } catch(err) {
         toast.add({
-          id: 'update_downloaded',
-          title: 'Transaction deleted.',
+          title: 'Error deleting transaction.',
           icon: 'i-heroicons-exclamation-circle',
           color: 'red'
         })
@@ -64,6 +65,7 @@
   const iconColor = computed(() => isIncome.value ? 'text-green-600' : 'text-red-400')
 
   const { currency }  = useCurrency(props.transaction.amount)
+  
   const items = [
     [
       {
