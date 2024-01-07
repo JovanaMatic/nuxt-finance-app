@@ -13,7 +13,10 @@
   </section>
 
   <section>
-    <Transactions v-for="transaction in data" :key="transaction.id" :transaction="transaction"/>
+    <div v-for="(transactionbyDay, date) in transactionGroupedByDay" :key="date" class="mb-10">
+      <DailyTransaction :date="date" :transactions="transactionbyDay" />
+      <Transactions v-for="transaction in transactionbyDay" :key="transaction.id" :transaction="transaction" />
+    </div>
   </section>
 </template>
 
@@ -29,6 +32,21 @@
     return data
   })
 
+  const transactionGroupedByDay = computed(() => {
+    let grouped = {};
+    let newArr = []
+
+    data.value.map(item => {
+      if (!grouped.hasOwnProperty(item.created_at.slice(0, 10))) {
+        newArr.push(item)
+        grouped[item.created_at.slice(0, 10)] =  [item]
+      }else{
+        grouped[item.created_at.slice(0, 10)].push(item)
+      }
+      return grouped
+    })
+    return grouped
+  })
 
 
 </script>
