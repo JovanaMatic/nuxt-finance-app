@@ -13,7 +13,7 @@
         </div>
       </template>
 
-      <UForm :state="state">
+      <UForm :state="state" :schema="schema" ref="form" @submit.prevent="save">
         <UFormGroup :required="true" label="Transaction type" name="type" class="mb-4">
             <USelect placeholder="Select the transaction type" :options="types" v-model="state.type"></USelect>
           </UFormGroup>
@@ -30,7 +30,7 @@
             <UInput type="text" placeholder="include description" v-model="state.description"/>
           </UFormGroup>
 
-          <UFormGroup :required="true" label="Category" name="category" class="mb-4">
+          <UFormGroup :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expenses'">
             <USelect :options="categories" v-model="state.category"></USelect>
           </UFormGroup>
 
@@ -47,8 +47,42 @@
 
 <script setup>
   import { categories, types } from '~/constants'
-  const category = ref(categories[0])
-  const type = ref(types[0])
+  import { z } from 'zod'
+  
+  const defaultSchema = z.object({
+    created_at: z.string(),
+    description: z.string().optional(),
+    amount: z.number().positive('Amount needs to be larger that 0'),
+    transaction: z.string(),
+  })
+
+  const incomeSchema = z.object({
+    type: z.literal('Income')
+  })
+
+  const expensesSchema = z.object({
+    type: z.literal('Expenses'),
+    category: z.enum(categories)
+  })
+
+   const investmentSchema = z.object({
+    type: z.literal('Investment')
+  })
+
+  const savingSchema = z.object({
+    type: z.literal('Saving')
+  })
+
+  const schema = z.intersection(
+    z.discriminatedUnion('type', [incomeSchema, expensesSchema, investmentSchema, savingSchema]),
+    defaultSchema
+  )
+
+  const form = ref()
+
+  const save = async () => {
+    form.value.validate()
+  }
 
   const state = ref({
     type: undefined,
