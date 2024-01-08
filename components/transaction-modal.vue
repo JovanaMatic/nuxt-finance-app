@@ -84,13 +84,20 @@
     form.value.validate()
   }
 
-  const state = ref({
+  const initialState = {
     type: undefined,
     amount: 0,
     created_at: undefined,
     description: undefined,
     category: undefined
-  })
+  }
+  const state = ref({...initialState})
+
+  const resetForm = () => {
+    Object.assign(state.value, initialState)
+    // clear errors if any when closing the form modal
+    form.value.clear()
+  }
 
   const props = defineProps({
     modelValue: Boolean
@@ -99,8 +106,22 @@
 
   const isOpen = computed({
     get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+    set: (value) => {
+      if (!value) setTimeout(() => {
+        resetForm()
+      }, 400);
+      emit('update:modelValue', value)
+    }
   })
+
+  // watch(isOpen, () => {
+
+  // if (isOpen.value === false) {
+  //  setTimeout(() => {
+  //   resetForm()
+  //  }, 400);
+  // }
+// })
 </script>
 
 <style scoped>
