@@ -20,7 +20,8 @@
       </div>
     </div>
     <div>
-      <UButton icon="i-heroicons-plus" color="white" variant="solid" label="Add"/>
+      <TransactionModal v-model="isOpen"></TransactionModal>
+      <UButton icon="i-heroicons-plus" color="white" variant="solid" label="Add" @click="isOpen = true" />
     </div>
   </section>
 
@@ -40,6 +41,7 @@
   const selectedView = ref(transactionView[1])
   const isLoading = ref(false)
   const transactionData = ref([])
+  const isOpen = ref(false)
 
   const supabase = useSupabaseClient()
 
