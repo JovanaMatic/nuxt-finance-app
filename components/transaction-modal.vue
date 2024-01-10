@@ -13,7 +13,7 @@
         </div>
       </template>
 
-      <UForm :state="state" :schema="schema" ref="form" @submit.prevent="save">
+      <UForm :state="state" :schema="schema" ref="form" @submit="save">
         <UFormGroup :required="true" label="Transaction type" name="type" class="mb-4">
             <USelect placeholder="Select the transaction type" :options="types" v-model="state.type"></USelect>
           </UFormGroup>
@@ -38,7 +38,7 @@
       </UForm>
 
         <div class="flex justify-end">
-          <UButton @click="isOpen = false" color="white" variant="solid" class="mt-5">Close</UButton>
+          <UButton @click="isOpen = false" color="white" variant="solid" class="mt-5" :loading="isLoading">Close</UButton>
         </div>
       </UCard>
     </UModal>
@@ -48,12 +48,18 @@
 <script setup>
   import { categories, types } from '~/constants'
   import { z } from 'zod'
+  const supabase = useSupabaseClient()
+  const toast = useToast()
+
+  const props = defineProps({
+    modelValue: Boolean
+  })
+  const emit = defineEmits(['update:modelValue', 'saved'])
   
   const defaultSchema = z.object({
     created_at: z.string(),
     description: z.string().optional(),
-    amount: z.number().positive('Amount needs to be larger that 0'),
-    transaction: z.string(),
+    amount: z.number().positive('Amount needs to be larger that 0')
   })
 
   const incomeSchema = z.object({
@@ -79,9 +85,38 @@
   )
 
   const form = ref()
+  const isLoading = ref(false)
 
+  
   const save = async () => {
-    form.value.validate()
+    if (form.value.errors.length) return
+
+    isLoading.value = true
+    try {
+      const { error } = await supabase
+      .from('transactions')
+      .upsert({ ...state.value })
+
+      if (!error) {
+        toast.add({
+          title: 'Transaction saved',
+          icon: 'i-heroicons-check-circle'
+        })
+        isOpen.value = false
+        emit('saved')
+        return
+      }
+      throw error
+    } catch (e) {
+      toast.add({
+          title: 'Failed to save transaction',
+          description: e.message,
+          icon: 'i-heroicons-exclamation-circle',
+          color: 'red'
+        })
+    } finally {
+      isLoading.value = false
+    }
   }
 
   const initialState = {
@@ -92,6 +127,7 @@
     category: undefined
   }
   const state = ref({...initialState})
+  
 
   const resetForm = () => {
     Object.assign(state.value, initialState)
@@ -99,18 +135,11 @@
     form.value.clear()
   }
 
-  const props = defineProps({
-    modelValue: Boolean
-  })
-  const emit = defineEmits(['update:modelValue'])
-
   const isOpen = computed({
     get: () => props.modelValue,
     set: (value) => {
-      if (!value) setTimeout(() => {
-        resetForm()
-      }, 400);
-      emit('update:modelValue', value)
+        if (!value) resetForm()
+        emit('update:modelValue', value)
     }
   })
 

@@ -20,7 +20,7 @@
       </div>
     </div>
     <div>
-      <TransactionModal v-model="isOpen"></TransactionModal>
+      <TransactionModal v-model="isOpen" @saved="refreshTransactions()"></TransactionModal>
       <UButton icon="i-heroicons-plus" color="white" variant="solid" label="Add" @click="isOpen = true" />
     </div>
   </section>
@@ -61,7 +61,7 @@
     isLoading.value = true
     try {
       const { data } = await useAsyncData('transaction', async () => {
-        const { data, error } = await supabase.from('transactions').select()
+        const { data, error } = await supabase.from('transactions').select().order('created_at', { ascending: false })
         if (error) return []
         return data
     })
@@ -76,7 +76,6 @@
     transactionData.value =  await fetchTransactions()
   }
   await refreshTransactions()
-  
   const transactionGroupedByDay = computed(() => {
     let grouped = {};
     let newArr = []
