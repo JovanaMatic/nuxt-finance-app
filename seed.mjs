@@ -4,10 +4,15 @@ import 'dotenv/config'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
+  // replace with real supabase key from supabase settings => API => secreat key 
   process.env.SUPABASE_KEY, {
   auth: { persistSession: false }
 })
 const categories = ['Food', 'Housing', 'Car', 'Entertainment']
+
+const { data: { users }, error } = await supabase.auth.admin.listUsers()
+
+const userIds = users.map(user => user.id)
 
 async function seedTransactions() {
   // Delete existing data
@@ -21,7 +26,8 @@ async function seedTransactions() {
 
   let transactions = []
 
-  for (let year = new Date().getFullYear(); year > new Date().getFullYear() - 2; year--) {
+  for (const user of userIds) {
+    for (let year = new Date().getFullYear(); year > new Date().getFullYear() - 2; year--) {
     for (let i = 0; i < 10; i++) {
       const date = new Date(
         year,
@@ -62,9 +68,11 @@ async function seedTransactions() {
         amount,
         type,
         description: faker.lorem.sentence(),
-        category: type === 'Expense' ? category : null // Category only for 'Expense'
+        category: type === 'Expense' ? category : null,
+        user_id: user // Category only for 'Expense'
       })
     }
+  }
   }
 
   const { error: insertError } = await supabase.from('transactions').upsert(transactions)
