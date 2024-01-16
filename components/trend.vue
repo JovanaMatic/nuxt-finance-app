@@ -27,8 +27,16 @@
     color: String,
     loading: Boolean
   })
+
+  // make prop reactive:
+  const { amount } = toRefs(props)
+
   const trendingUp = computed(() => props.amount >= props.lastAmount)
+
   const icon = computed(() => trendingUp.value ? 'i-heroicons-arrow-trending-up' : 'i-heroicons-arrow-trending-down')
+  
+  const { currency } = useCurrency(amount)
+  
   const percent = computed(() => {
     if (props.amount === 0 || props.lastAmount === 0) {
       return '∞%'
@@ -38,10 +46,9 @@
 
     const ratio = ((bigger- smaller) / smaller) * 100
 
-    return ratio
+    return `${Math.ceil(ratio)}%`
   })
-  
-  const { currency } = useCurrency(props.amount)
+
 </script>
 
 <style scoped>

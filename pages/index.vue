@@ -6,8 +6,8 @@
     </div>
   </section>
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-16 mb-10">
-    <Trend color="green" title="Income" :amount="incomeTotal" :last-amount="3000" :loading="isLoading"></Trend>
-    <Trend color="red" title="Expense" :amount="expenseTotal" :last-amount="5000" :loading="isLoading"></Trend>
+    <Trend color="green" title="Income" :amount="incomeTotal" :last-amount="previousIncomeTotal" :loading="isLoading"></Trend>
+    <Trend color="red" title="Expense" :amount="expenseTotal" :last-amount="previousExpenseTotal" :loading="isLoading"></Trend>
     <Trend color="red" title="Investments" :amount="4000" :last-amount="2000" :loading="isLoading"></Trend>
     <Trend color="green" title="Savings" :amount="4000" :last-amount="6000" :loading="isLoading"></Trend>
   </section>
@@ -40,11 +40,15 @@
   import { transactionView } from '~/constants'
   const selectedView = ref(transactionView[1])
   const isOpen = ref(false)
+  
+  const { current, previous } = useSelectedTimePeriod(selectedView)
 
-  const { isLoading, incomeTotal, expenseTotal, incomeCount, expenseCount, refreshTransactions, transactionGroupedByDay } = useFetchTransactions()
-
+  const { isLoading, incomeTotal, expenseTotal, incomeCount, expenseCount, refreshTransactions, transactionGroupedByDay } = useFetchTransactions(current)
   await refreshTransactions()
-
+  
+  const {
+    incomeTotal: previousIncomeTotal,
+    expenseTotal: previousExpenseTotal } = useFetchTransactions(previous)
 </script>
 
 <style scoped>

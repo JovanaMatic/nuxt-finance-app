@@ -1,7 +1,8 @@
-export const useFetchTransactions = () => {
+export const useFetchTransactions = (period) => {
   const transactionData = ref([])
   const supabase = useSupabaseClient()
   const isLoading = ref(false)
+
 
   const income = computed(() => transactionData.value.filter(item => item.type === 'Income'))
   const expense = computed(() => transactionData.value.filter(item => item.type === 'Expense'))
@@ -18,8 +19,13 @@ export const useFetchTransactions = () => {
   const fetchTransactions = async () => {
     isLoading.value = true
     try {
-      const { data } = await useAsyncData('transaction', async () => {
-        const { data, error } = await supabase.from('transactions').select().order('created_at', { ascending: false })
+      const { data } = await useAsyncData(`transactions-${period.value.from.toDateString()}-${period.value.to.toDateString()}`, async () => {
+        const { data, error } = await supabase
+        .from('transactions')
+        .select()
+        .gte('created_at', period.value.from.toISOString())
+        .lte('created_at', period.value.to.toISOString())
+        .order('created_at', { ascending: false })
         if (error) return []
         return data
     })
@@ -33,6 +39,8 @@ export const useFetchTransactions = () => {
   const refreshTransactions = async () => {
     transactionData.value =  await fetchTransactions()
   }
+
+  watch(period, () => refreshTransactions())
 
   const transactionGroupedByDay = computed(() => {
     let grouped = {};
