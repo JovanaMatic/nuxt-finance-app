@@ -5,6 +5,7 @@ import 'dotenv/config'
 const supabase = createClient(
   process.env.SUPABASE_URL,
   // replace with real supabase key from supabase settings => API => secreat key 
+  // we need to add key here since we changed the policy in our db so we need to bypass these new auth policies
   process.env.SUPABASE_KEY, {
   auth: { persistSession: false }
 })
