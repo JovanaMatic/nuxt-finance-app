@@ -29,7 +29,7 @@
   const emit = defineEmits(['deleted'])
 
   const supabase = useSupabaseClient()
-  const { toastSuccess, toastError } = useToast()
+  const { toastSuccess, toastError } = useAppToast()
 
   const isLoading = ref(false)
 
@@ -46,6 +46,7 @@
           description: 'Data will be loaded in a few seconds'
         })
         emit('deleted', props.transaction.id)
+
     } catch(err) {
         toastError({
           title: 'Error deleting transaction.'
