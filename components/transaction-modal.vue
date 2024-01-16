@@ -49,7 +49,7 @@
   import { categories, types } from '~/constants'
   import { z } from 'zod'
   const supabase = useSupabaseClient()
-  const toast = useToast()
+  const { toastSuccess, toastError } = useAppToast()
 
   const props = defineProps({
     modelValue: Boolean
@@ -98,9 +98,8 @@
       .upsert({ ...state.value })
 
       if (!error) {
-        toast.add({
-          title: 'Transaction saved',
-          icon: 'i-heroicons-check-circle'
+        toastSuccess({
+          title: 'Transaction saved'
         })
         isOpen.value = false
         emit('saved')
@@ -108,11 +107,9 @@
       }
       throw error
     } catch (e) {
-      toast.add({
+      toastError({
           title: 'Failed to save transaction',
-          description: e.message,
-          icon: 'i-heroicons-exclamation-circle',
-          color: 'red'
+          description: e.message
         })
     } finally {
       isLoading.value = false

@@ -28,7 +28,7 @@
   const success = ref(false)
   const email = ref('')
   const isLoading = ref(false)
-  const toast = useToast()
+  const { toastSuccess } = useAppToast()
   const supabase = useSupabaseClient()
 
   const handleLoading = async () => {
@@ -40,13 +40,11 @@
         emailRedirectTo: 'http://localhost:3000'
       }
     })
-
+    console.log('success')
     if (error) {
-      toast.add({
+      toastSuccess({
         title: 'Sign in failed',
-        icon: 'i-heroicons-exclamation-circle',
-        description: error.message,
-        color: 'red'
+        description: error.message
       })
     } else {
       success.value = true

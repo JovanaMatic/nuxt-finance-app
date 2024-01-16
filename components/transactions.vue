@@ -29,7 +29,7 @@
   const emit = defineEmits(['deleted'])
 
   const supabase = useSupabaseClient()
-  const toast = useToast()
+  const { toastSuccess, toastError } = useToast()
 
   const isLoading = ref(false)
 
@@ -41,18 +41,14 @@
         .delete()
         .eq('id', props.transaction.id)
 
-        toast.add({
+        toastSuccess({
           title: 'Transaction deleted.',
-          description: 'Data will be loaded in a few seconds',
-          icon: 'i-heroicons-check-circle',
-          color: 'green'
+          description: 'Data will be loaded in a few seconds'
         })
         emit('deleted', props.transaction.id)
     } catch(err) {
-        toast.add({
-          title: 'Error deleting transaction.',
-          icon: 'i-heroicons-exclamation-circle',
-          color: 'red'
+        toastError({
+          title: 'Error deleting transaction.'
         })
     } finally {
       isLoading.value = false
