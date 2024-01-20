@@ -38,8 +38,11 @@
 
 <script setup>
   import { transactionView } from '~/constants'
-  const selectedView = ref(transactionView[1])
   const isOpen = ref(false)
+
+  const user = useSupabaseUser()
+
+  const selectedView = ref(user.value.user_metadata.transaction_view ?? transactionView[1])
   
   const { current, previous } = useSelectedTimePeriod(selectedView)
 

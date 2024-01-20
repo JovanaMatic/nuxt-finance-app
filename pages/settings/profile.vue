@@ -41,7 +41,6 @@
       if(state.value.email !== user.value.email) {
         data.email = state.value.email
       }
-      console.log(data)
 
       if (error) throw error
 
