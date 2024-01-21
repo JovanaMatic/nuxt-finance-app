@@ -8,11 +8,12 @@
 </template>
 
 <script setup>
+  const { url } = useAvatarUrl()
   const links = [{
   label: 'Profile',
   to: '/settings/profile',
   avatar: {
-    src: 'https://avatars.githubusercontent.com/u/739984?v=4'
+    src: url.value
   },
 }, {
   label: 'Avatar',
