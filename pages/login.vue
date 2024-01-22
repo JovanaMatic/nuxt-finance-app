@@ -30,6 +30,7 @@
   const isLoading = ref(false)
   const { toastSuccess } = useAppToast()
   const supabase = useSupabaseClient()
+  const redirectUrl = useRuntimeConfig().public.baseUrl
 
   const handleLoading = async () => {
     isLoading.value = true
@@ -37,7 +38,7 @@
       const { error } = await supabase.auth.signInWithOtp({
       email: email.value,
       options: {
-        emailRedirectTo: 'http://localhost:3000'
+        emailRedirectTo: `${redirectUrl}/confirm`
       }
     })
     console.log('success')
