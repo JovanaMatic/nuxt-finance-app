@@ -42,7 +42,7 @@
 
   const user = useSupabaseUser()
 
-  const selectedView = ref(user.value.user_metadata.transaction_view ?? transactionView[1])
+  const selectedView = ref(user.value.user_metadata?.transaction_view ?? transactionView[1])
 
   const { current, previous } = useSelectedTimePeriod(selectedView)
 
