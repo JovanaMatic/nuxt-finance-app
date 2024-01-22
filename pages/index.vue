@@ -28,7 +28,7 @@
   <section v-if="!isLoading">
     <div v-for="(transactionbyDay, date) in transactionGroupedByDay" :key="date" class="mb-10">
       <DailyTransaction :date="date" :transactions="transactionbyDay" />
-      <Transactions v-for="transaction in transactionbyDay" :key="transaction.id" :transaction="transaction" @deleted="refreshTransactions()"/>
+      <Transactions v-for="transaction in transactionbyDay" :key="transaction.id" :transaction="transaction" @deleted="refreshTransactions()" @edited="refreshTransactions()"/>
     </div>
   </section>
   <section v-else>
@@ -43,12 +43,12 @@
   const user = useSupabaseUser()
 
   const selectedView = ref(user.value.user_metadata.transaction_view ?? transactionView[1])
-  
+
   const { current, previous } = useSelectedTimePeriod(selectedView)
 
   const { isLoading, incomeTotal, expenseTotal, incomeCount, expenseCount, refreshTransactions, transactionGroupedByDay } = useFetchTransactions(current)
   await refreshTransactions()
-  
+
   const {
     incomeTotal: previousIncomeTotal,
     expenseTotal: previousExpenseTotal } = useFetchTransactions(previous)

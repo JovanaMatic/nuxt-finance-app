@@ -5,7 +5,7 @@
       <template #header>
         <div class="flex items-center justify-between">
           <div>
-            <h2>Add Transaction</h2>
+            <h2>{{ isEditing ? 'Edit' : 'Add'}} Transaction</h2>
           </div>
         <div>
           <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" @click="isOpen = false" />
@@ -15,7 +15,7 @@
 
       <UForm :state="state" :schema="schema" ref="form" @submit="save">
         <UFormGroup :required="true" label="Transaction type" name="type" class="mb-4">
-            <USelect placeholder="Select the transaction type" :options="types" v-model="state.type"></USelect>
+            <USelect :disabled="isEditing" placeholder="Select the transaction type" :options="types" v-model="state.type"></USelect>
           </UFormGroup>
 
           <UFormGroup label="Amount" required name="amount" class="mb-4">
@@ -30,7 +30,7 @@
             <UInput type="text" placeholder="include description" v-model="state.description"/>
           </UFormGroup>
 
-          <UFormGroup :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expenses'">
+          <UFormGroup :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expense'">
             <USelect :options="categories" v-model="state.category"></USelect>
           </UFormGroup>
 
@@ -52,10 +52,16 @@
   const { toastSuccess, toastError } = useAppToast()
 
   const props = defineProps({
-    modelValue: Boolean
+    modelValue: Boolean,
+    transaction: {
+      type: Object,
+      required: false
+    }
   })
   const emit = defineEmits(['update:modelValue', 'saved'])
-  
+
+  const isEditing = computed(() => !!props.transaction)
+
   const defaultSchema = z.object({
     created_at: z.string(),
     description: z.string().optional(),
@@ -67,7 +73,7 @@
   })
 
   const expensesSchema = z.object({
-    type: z.literal('Expenses'),
+    type: z.literal('Expense'),
     category: z.enum(categories)
   })
 
@@ -87,7 +93,6 @@
   const form = ref()
   const isLoading = ref(false)
 
-  
   const save = async () => {
     if (form.value.errors.length) return
 
@@ -95,7 +100,11 @@
     try {
       const { error } = await supabase
       .from('transactions')
-      .upsert({ ...state.value })
+      .upsert(
+        {
+          ...state.value,
+          id: props.transaction?.id
+           })
 
       if (!error) {
         toastSuccess({
@@ -116,7 +125,13 @@
     }
   }
 
-  const initialState = {
+  const initialState = isEditing.value ? {
+    type: props.transaction.type,
+    amount: props.transaction.amount,
+    created_at: props.transaction.created_at.split('T')[0],
+    description: props.transaction.description,
+    category: props.transaction.category
+  } : {
     type: undefined,
     amount: 0,
     created_at: undefined,
@@ -124,7 +139,6 @@
     category: undefined
   }
   const state = ref({...initialState})
-  
 
   const resetForm = () => {
     Object.assign(state.value, initialState)
